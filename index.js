@@ -8,4 +8,4 @@ var config = {
   user: process.env.USER  || 'alnavarro@gmail.com',
 }
 
-reader( config.url, config.port, config.port ).then( writter );
+read( config.url, config.port, config.port ).then( write );

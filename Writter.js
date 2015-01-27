@@ -2,18 +2,16 @@ module.exports =
 
 function reader(data,file) {
 
-  var output_file = new Buffer(0);
+  var output = new Buffer(0);
 
-  valid_packages = generateValidPackages(data);
+  packages  = generateValidPackages(data);
 
-  for(c = 0; c < Object.keys(valid_packages) ; ++c)
-    output_file = Buffer.concat([output_file, valid_packages[c]]);
+  for(key in Object.keys(packages))
+    output = Buffer.concat([output, packages[key]]);
 
-    file = file || 'message.raw';
+  require('fs').writeFileSync('Message.raw', output);
 
-    require('fs').writeFileSync('Message.raw', output_file);
-
-    console.log("Message Saved");
+  console.log("Message Saved");
 
 };
 
@@ -36,23 +34,20 @@ function generateValidPackages(data){
 }
 
 
-
 function verifyChecksum(SEQ, CHK, DATA) {
 
-  var SQC = new Buffer(4);
-
-  SEQ.copy(SQC);
+  var SQC = new Buffer(4);  SEQ.copy(SQC); // Force copy 4 bytes.
 
   for(var i = 0; i < DATA.length; i += 4) {
 
     var slice = DATA.slice(i, i + 4);
-    var correction = new Buffer([171, 171, 171, 171]);
+    var correction = new Buffer([171, 171, 171, 171]); // 0xAB --> 171 Decimal
 
     for(var a = 0; a < slice.length; ++a)
       correction[a] = slice[a];
 
     for(var b = 0; b < 4; ++b)
-      SQC[b] = SQC[b] ^ correction[b];
+      SQC[b] = SQC[b] ^ correction[b]; // XOR'ing
 
   };
 
