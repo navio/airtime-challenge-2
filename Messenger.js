@@ -15,12 +15,12 @@ function(url,port,user){
 
     var array_data = data.toString().split(":");
 
-    if(array_data[0] === 'WHORU' )  // "IAM:<challenge number>:<user email address>:at\n"
+    if(array_data[0] === 'WHORU' ){  // "IAM:<challenge number>:<user email address>:at\n"
       connection.write( ['IAM', array_data[1].replace(/\n/gi, '') , user ,'at'].join(':') + "\n" );
       return;
+    }
 
-    if(array_data[0] === 'SUCCESS' ) // Dismiss PKG, start transfer.
-      return;
+    if (array_data[0] === 'SUCCESS' ) return;// Dismiss PKG, start transfer.
 
     buffer = Buffer.concat([buffer, new Buffer(data, 'binary')]);
 
@@ -28,7 +28,7 @@ function(url,port,user){
   });
 
   connection.on('end', function(data) {
-    console.log('File Transmited');
+    console.log('File Transmited, size:', buffer.length);
     deferred.resolve(buffer);
   })
 
