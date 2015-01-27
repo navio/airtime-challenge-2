@@ -1,0 +1,15 @@
+{
+  "name": "MessageApp",
+  "version": "1.0.0",
+  "description": "Challenge for AirTime | http://challenge2.airtime.com:2324/instructions",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "AirTime",
+    "Challenge"
+  ],
+  "author": "Alberto Navarro | alnavarro@gmail.com",
+  "license": "ISC"
+}
