@@ -11,5 +11,8 @@
     "Challenge"
   ],
   "author": "Alberto Navarro | alnavarro@gmail.com",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "q": "~1.1.2"
+  }
 }
