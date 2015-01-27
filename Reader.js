@@ -1,58 +1,37 @@
+
+var net = require('net');
+var Q   = require("q");
+
 module.exports =
 
-function reader(data) {
+function(url,port,user){
+  var deferred   = Q.defer();
+  var connection = new net.Socket();
+  var buffer     = new Buffer(0, 'binary');
 
-  var output_file = new Buffer(0);
+  connection.connect(port,url);
 
-  valid_packages = generateValidPackages(data);
+  connection.on('data', function(data) {
 
-  output_file = valid_packages.join('');
+    var array_data = data.toString().split(":");
 
-  require('fs').writeFileSync('ubiquity.raw', output_file);
+    if(array_data[0] === 'WHORU' ){  // "IAM:<challenge number>:<user email address>:at\n"
+      connection.write( ['IAM', array_data[1].replace(/\n/gi, '') , user ,'at'].join(':') + "\n" );
+      return;
+    }
 
-  console.log("%s packages found", Object.keys(valid_packages).length);
+    if (array_data[0] === 'SUCCESS' ) return;// Dismiss PKG, start transfer.
 
-};
-
-function generateValidPackages(data){
-
-  var valid_packages = [];
-
-  for(location = 0; location < data.length; location += 12 + LEN ){
-
-    var SEQ  = data.slice(location, location + 4); // 0 to
-
-    var CHK  = data.slice(location + 4, location + 8);
-
-    var LEN  = data.readInt32BE(location + 8);
-
-    var PCM  = data.slice(location + 12, location + 12 + LEN);
-
-    if ( verifyChecksum(SEQ, CHK, PCM) ) valid_packages.push(PCM);
-  }
-
-  return valid_packages;
-
-}
+    buffer = Buffer.concat([buffer, new Buffer(data, 'binary')]);
 
 
-function verifyChecksum(SEQ, CHK, DATA) {
+  });
 
-  var SQC = new Buffer(4);
+  connection.on('end', function(data) {
+    console.log('File Transmited, size:', buffer.length);
+    deferred.resolve(buffer);
+  })
 
-  SEQ.copy(SQC);
+  return deferred.promise;
 
-  for(var i = 0; i < DATA.length; i+=4) {
-
-    var slice = DATA.slice(i, i+4);
-
-    var correction = new Buffer([171, 171, 171, 171]);
-
-    for(var j = 0; j < slice.length; ++j) correction[j] = slice[j];
-
-    for(var k = 0; k < 4; ++k) SQC[k] = SQC[k] ^ correction[k];
-
-  };
-
-  return SQC.readInt32BE(0) == CHK.readInt32BE(0);
 }
